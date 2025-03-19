@@ -63,16 +63,22 @@ h2 {
 }
 
 /* Tekstblokken */
-p {
+p, ul, ol {
     background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    display: block;
+    max-width: 900px;
 }
 
+/* Lijsten */
 ul, ol {
-    background: transparent !important;
-    padding: 0;
-    border: none;
+    padding-left: 20px;
 }
 
+ul ul, ul ol, ol ul, ol ol {
+    background: inherit !important;
+}
 
 /* Links */
 a {
