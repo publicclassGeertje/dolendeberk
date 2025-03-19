@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda - Jaaroverzicht</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">🏡 Home</a>
+        <a href="plattegrond.html">🗺️ Plattegrond</a>
+        <a href="agenda.html">📆 Agenda</a>
+    </nav>
+
+    <h1 id="kalender-titel" class="agenda-titel"></h1>
+    
+    <div class="kalender-controls">
+        <button onclick="veranderJaar(-1)">◀ Vorig jaar</button>
+        <button onclick="veranderJaar(1)">Volgend jaar ▶</button>
+    </div>
+
+    <div id="jaaroverzicht-container"></div>
+
+    <script>
+        let huidigJaar = new Date().getFullYear();
+
+        function toonKalender(jaar) {
+            document.getElementById("kalender-titel").textContent = "Agenda - " + jaar;
+
+            let container = document.getElementById("jaaroverzicht-container");
+            container.innerHTML = ""; // Leeg de oude kalender
+
+            let maanden = ["Januari", "Februari", "Maart", "April", "Mei", "Juni", 
+                           "Juli", "Augustus", "September", "Oktober", "November", "December"];
+
+            let vandaag = new Date();
+            let huidigeDag = vandaag.getDate();
+            let huidigeMaand = vandaag.getMonth();
+            let huidigJaarCheck = vandaag.getFullYear();
+
+            for (let maand = 0; maand < 12; maand++) {
+                let maandContainer = document.createElement("div");
+                maandContainer.classList.add("maand-container");
+
+                let maandTitel = document.createElement("h2");
+                maandTitel.textContent = maanden[maand];
+                maandContainer.appendChild(maandTitel);
+
+                let dagenTabel = document.createElement("table");
+                let headerRow = dagenTabel.insertRow();
+                let dagenNamen = ["M", "D", "W", "D", "V", "Z", "Z"];
+
+                for (let dag of dagenNamen) {
+                    let th = document.createElement("th");
+                    th.textContent = dag;
+                    headerRow.appendChild(th);
+                }
+
+                let eersteDag = new Date(jaar, maand, 1).getDay();
+                let aantalDagen = new Date(jaar, maand + 1, 0).getDate();
+                let row = dagenTabel.insertRow();
+                
+                for (let i = 0; i < eersteDag; i++) {
+                    row.insertCell();
+                }
+
+                for (let dag = 1; dag <= aantalDagen; dag++) {
+                    let cell = row.insertCell();
+                    cell.dataset.dag = dag;
+                    cell.innerHTML = `<span class="dag-nummer">${dag}</span>`;
+
+                    let datumKey = `${jaar}-${maand + 1}-${dag}`;
+                    let opgeslagenNaam = localStorage.getItem(datumKey);
+
+                    if (opgeslagenNaam) {
+                        cell.innerHTML += `<br><span class="naam">${opgeslagenNaam}</span>`;
+                    }
+
+                    cell.onclick = function() {
+                        voegNaamToe(datumKey, cell);
+                    };
+
+                    if (dag === huidigeDag && maand === huidigeMaand && jaar === huidigJaarCheck) {
+                        cell.classList.add("vandaag");
+                    }
+
+                    if ((eersteDag + dag) % 7 === 0) {
+                        row = dagenTabel.insertRow();
+                    }
+                }
+
+                maandContainer.appendChild(dagenTabel);
+                container.appendChild(maandContainer);
+            }
+        }
+
+        function veranderJaar(verschil) {
+            huidigJaar += verschil;
+            toonKalender(huidigJaar);
+        }
+
+        function voegNaamToe(datumKey, cell) {
+            let naam = prompt("Vul je naam in of laat leeg om de naam te verwijderen:");
+            
+            if (naam === null) return; // Annuleren doet niets
+
+            if (naam.trim() === "") {
+                localStorage.removeItem(datumKey); // Verwijder de naam
+                cell.innerHTML = `<span class="dag-nummer">${cell.dataset.dag}</span>`; // Herstel nummer
+            } else {
+                localStorage.setItem(datumKey, naam);
+                cell.innerHTML = `<span class="dag-nummer">${cell.dataset.dag}</span><br><span class="naam">${naam}</span>`;
+            }
+        }
+
+        toonKalender(huidigJaar);
+    </script>
+
+</body>
+</html>
